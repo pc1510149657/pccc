@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.3.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-4.3.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+	<!-- 
+		id 表示对象的id值, 在所有bean标签中唯一.
+		class 表示创建对象的类
+		name 表示bean的名称, bean标签中的name可以重名, 编译不会报错, 但是在运行时会报错
+		abstract 表示是否是抽象类, [抽象类不能创建对象]
+		
+		scope 表示域[这里理解为是创建什么类型的对象]
+			其值有: singleton[默认值][重点], prototype[重点], request, session
+				singleton 表示创建单例对象.
+				prototype表示 创建多例对象.
+				
+		lazy-init 该属性只有在scope属性值为singleton的时候, 才起到作用.
+			也就是说, 当对象为单例模式的时候, 可以通过该属性来设置是懒汉式,还是饿汉式
+			值有三种形式 true[懒加载][延迟加载][懒汉式], false[非懒加载][非延迟加载][饿汉式], default
+		
+		init-method 表示创建对象的初始化方法.
+			在单例默认的对象中只执行一次.
+			在多例模式的对象中, 每创建一次对象, 就执行一次.
+			
+		destroy-method 是在IOC容器被销毁的时候调用的方法.
+			这里的方法只针对singleton有效, 对portotype无效.
+			
+		bean的生命周期: 
+			singleton:
+				lazy-init=false
+					1, 在ioc容器创建的时候就创建出对象.
+					2, 执行一次init-method方法.
+					3, 当ioc容器销毁的时候, 调用destroy-method方法
+					
+				lazy-init=true
+					1, 在第一次从IOC容器获取对象的时候把对象创建出来.
+					2, 执行一次init-method方法.
+					3, 当ioc容器销毁的时候, 调用destroy-method方法
+			
+			prototype:
+				1, 每次从IOC容器中获取对象的时候都会创建一次对象.
+				2, 每次创建对象后都会调用init-method方法.
+				3, 对象时候完之后会被JVM的GC[垃圾回收机制]进行回收
+				
+			
+		bean的生命周期详细理解:
+			1、实例化
+				当我们加载sping-config.xml文件时，bean就会被实例化到内存（前提是scope=singleton 前提二: lazy-init=default）
+			2、设置属性值
+				调用set方法设置属性，前提是有对应的set方法
+			3、如果你调用BeanNameAware的set’Bean’Name()方法
+				这是个接口，该方法可以给出正在被调用的bean的id
+			4、如果你调用BeanFactoryAware的setBeanFactory()方法
+				这也是个接口，该方法可以传递beanFactory
+			5、如果你调用了ApplicationContextAeare的setApplicationContext()方法
+				同样为接口，该方法传递一个ApplicationContext
+			6、BeanPostProcessor的预初始化方法Before
+				这个东西很厉害了，可以叫做后置处理器，它不是接口，具体细节，代码体现
+			7、如果你调用了InitializingBean的afterPropertiesSet()方法
+			8、调用自己的init方法，具体为在bean中有一个属性inin-method=”init”
+			9、BeanPostProcessor的方法After
+			10、使用bean，体现为调用了sayHi()方法
+			11、容器关闭
+			12、可以实现DisposableBean接口的destory方法
+			13、可以在调用自己的销毁方法，类似于8
+			
+			实际开发过程中，并没有这么复杂，常见过程为，1，2，6，9，10，11
+
+		
+		
+		
+		
+	 -->
+
+	<!-- 
+		空参构造方法创建对象
+	 -->
+	<bean id="user" name="user" class="a.User" scope="singleton" lazy-init="false" init-method="init_" destroy-method="destroy_" ></bean>
+
+
+	<!-- 
+		表示创建对象: String str = new String("siri");
+	 -->
+	<bean id="str" class="java.lang.String">
+		<constructor-arg index="0" value="siri"></constructor-arg>
+	</bean>
+
+	<!-- 
+		有参构造方法创建对象
+	 -->
+	<bean id="user2" class="a.User">
+		<!-- 
+			constructor-arg 中写的是构造方法中的参数
+			index 表示参数的下标[表示第几个参数, 从0开始]
+			name 表示参数的名称[一定不能使用, 关键字, 保留字, 敏感字等]
+			type 表示该参数的类型
+			ref 表示该参数引用的类型对象
+			value 表示该参数的值
+		 -->
+		<constructor-arg index="0" type="int" value="111"></constructor-arg>
+		<constructor-arg index="1" type="String" ref="str"></constructor-arg>
+		<constructor-arg index="2" type="int" value="5"></constructor-arg>
+	</bean>
+	
+	<!-- 
+		factory-method: 工厂中创建对象的方法.
+			如果是静态方法, 则直接写.
+			如果是非静态方法, 则首先获取到工厂实例
+			
+		factory-bean: 工厂实例
+	 -->
+	
+	<!-- 
+		通过静态工厂创建对象
+	 -->
+	 <bean id="user3" class="a.UserFactory" factory-method="getUser"></bean>
+
+	<!-- 
+		通过非静态工厂创建对象
+			首先要获取到工厂对象
+	 -->
+	<bean id="factory" class="a.UserFactory"></bean>
+	<bean id="user4" factory-bean="factory" factory-method="getUser2"></bean>
+
+</beans>
